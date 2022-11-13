@@ -1,0 +1,60 @@
+html,
+body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	background: #222;
+	color: #ddd;
+	display: flex;
+	flex-flow: row nowrap;
+}
+
+main {
+	flex: 1 1 1em;
+	overflow: hidden;
+	display: flex;
+	flex-flow: column nowrap;
+}
+
+aside {
+	flex: 0 1 20em;
+}
+
+.control {
+	display: flex;
+	flex-flow: row nowrap;
+	margin: 8px;
+}
+
+.control .control-name {
+	text-align: right;
+	min-width: 6em;
+	font-family: monospace;
+	font-weight: 400;
+}
+
+.control .slider {
+	width: 8em;
+}
+
+.control .control-value {
+	text-align: right;
+	min-width: 4em;
+	font-family: monospace;
+	font-weight: 200;
+}
+
+.viewer {
+	align-self: stretch;
+	flex: 1 1 1em;
+	display: block;
+}
+
+.cursor {
+	flex: 0 0 3em;
+	font-family: monospace;
+	padding: 1em;
+	white-space: pre;
+}
