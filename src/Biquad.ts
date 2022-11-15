@@ -1,4 +1,4 @@
-export default class Biquad {
+export class Biquad {
 
 	private xz1: number = 0;
 	private xz2: number = 0;

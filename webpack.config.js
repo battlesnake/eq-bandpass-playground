@@ -17,9 +17,6 @@ module.exports = {
 			},
 		],
 	},
-	resolve: {
-		extensions: ['.ts', '.js'],
-	},
 	output: {
 		filename: 'main.js',
 		path: path.resolve(__dirname, 'public/js/'),
@@ -28,6 +25,10 @@ module.exports = {
 		fallback: {
 			fs: false,
 			path: false,
-		}
-	}
+		},
+		extensions: [
+			'.ts',
+			'.js',
+		],
+	},
 };
