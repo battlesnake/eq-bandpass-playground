@@ -12,7 +12,7 @@ export class SerialStrategy implements SpectrumStrategy {
 		private readonly model: Model,
 	) {
 		const { rate } = this.config;
-		const mapping = new Mapping(this.config, 0, 0);
+		const mapping = new Mapping(this.config);
 		const lmin = Math.floor(Math.log10(mapping.fmin)) | 0;
 		const lmax = Math.ceil(Math.log10(mapping.fmax)) | 0;
 		const res = 20;
@@ -28,7 +28,7 @@ export class SerialStrategy implements SpectrumStrategy {
 	}
 
 	calculate(): Float32Array {
-		const mapping = new Mapping(this.config, 0, 0);
+		const mapping = new Mapping(this.config);
 		const result = new Float32Array(this.sines.length * 2);
 		let out_it = 0;
 		for (const { f, y } of this.sines) {

@@ -5,15 +5,19 @@ export class Mapping {
 	public readonly fmin: number;
 	public readonly fmax: number;
 
+	public readonly width: number;
+	public readonly height: number;
+
 	constructor(
 		private readonly config: Config,
-		public readonly width: number,
-		public readonly height: number,
+		canvas: HTMLCanvasElement | null = null,
 		public readonly db_min: number = -60,
 		public readonly db_max: number = +60,
 	) {
 		this.fmin = 10;
 		this.fmax = Math.min(20000, config.rate / 2);
+		this.width = canvas?.width ?? 0;
+		this.height = canvas?.height ?? 0;
 	}
 
 	project(x: number, y: number): [number, number] {
@@ -64,8 +68,10 @@ export class Mapping {
 	}
 
 	unproject_f(u: number): number {
-		const { fmax } = this;
-		return Math.exp(u * Math.log(fmax));
+		const { fmin, fmax } = this;
+		const lmin = Math.log(fmin);
+		const lmax = Math.log(fmax);
+		return Math.exp(u * (lmax - lmin) + lmin);
 	}
 
 	unproject_i(u: number): number {

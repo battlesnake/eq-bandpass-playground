@@ -8,8 +8,8 @@ export class SpectrumView implements View {
 	private viewer_onclick(controller: Controller, e: MouseEvent) {
 		const viewer = d3.select(".viewer").node() as HTMLCanvasElement;
 		const { rate, size } = this.config;
-		const mapping = new Mapping(this.config, viewer.width, viewer.height);
-		const [x, y] = mapping.unproject(e.offsetX, e.offsetY);
+		const mapping = new Mapping(this.config, viewer);
+		const [x, y] = mapping.unproject(e.clientX * devicePixelRatio, e.clientY * devicePixelRatio);
 		const f = mapping.unproject_f(x);
 		const db = mapping.unproject_db(y);
 		controller.set_cursor(f, db);
@@ -27,8 +27,9 @@ export class SpectrumView implements View {
 	init(controller: Controller) {
 		const viewer = d3.select(".viewer").node() as HTMLCanvasElement;
 		const observer = new ResizeObserver(() => {
-			viewer.width = Math.round(viewer.clientWidth * devicePixelRatio);
-			viewer.height = Math.round(viewer.clientHeight * devicePixelRatio);
+			const ratio = window.devicePixelRatio;
+			viewer.width = Math.round(viewer.clientWidth * ratio);
+			viewer.height = Math.round(viewer.clientHeight * ratio);
 			controller.update();
 		});
 		observer.observe(viewer);
@@ -42,7 +43,7 @@ export class SpectrumView implements View {
 		const width = node.width;
 		const height = node.height;
 		ctx.clearRect(0, 0, width, height);
-		const mapping = new Mapping(config, width, height);
+		const mapping = new Mapping(config, node);
 		const { db_min, db_max } = mapping;
 		ctx.globalCompositeOperation = "lighter";
 		{

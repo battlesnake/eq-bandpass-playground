@@ -25,7 +25,7 @@ export class FourierStrategy implements SpectrumStrategy {
 		eq.apply(signal);
 		const transform = new Float32Array(size * 2);
 		(this.fft as any).realTransform(transform, [...signal]);
-		const mapping = new Mapping(this.config, 0, 0);
+		const mapping = new Mapping(this.config);
 		const result = new Float32Array(size);
 		for (let i = 0; i < size; i += 2) {
 			const level = Math.hypot(transform[i], transform[i + 1]) / Math.sqrt(signal.length) / 128;

@@ -71,6 +71,7 @@ aside {
 @media (orientation: portrait) {
 	body {
 		flex-direction: column;
+		max-width: 100%;
 	}
 	aside {
 		height: 50vh;
