@@ -1,3 +1,7 @@
+* {
+	box-sizing: border-box;
+}
+
 html,
 body {
 	height: 100%;
@@ -12,43 +16,48 @@ body {
 }
 
 main {
-	flex: 1 1 1em;
-	overflow: hidden;
+	flex: 1 1;
 	display: flex;
 	flex-flow: column nowrap;
 }
 
 aside {
-	flex: 0 1 20em;
+	flex: 0 0;
+	display: flex;
+	flex-flow: column wrap;
 }
 
 .control {
 	display: flex;
 	flex-flow: row nowrap;
-	margin: 8px;
+	margin: 4px;
+	justify-content: flex-end;
 }
 
 .control .control-name {
+	width: 5ch;
 	text-align: right;
-	min-width: 6em;
 	font-family: monospace;
 	font-weight: 400;
+	white-space: nowrap;
 }
 
 .control .slider {
-	width: 8em;
+	width: 9ch;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
 }
 
 .control .control-value {
+	width: 5ch;
 	text-align: right;
-	min-width: 4em;
 	font-family: monospace;
 	font-weight: 200;
+	white-space: nowrap;
 }
 
 .viewer {
-	align-self: stretch;
-	flex: 1 1 1em;
+	flex: 1 1;
 	display: block;
 }
 
@@ -58,3 +67,13 @@ aside {
 	padding: 1em;
 	white-space: pre;
 }
+
+@media (orientation: portrait) {
+	body {
+		flex-direction: column;
+	}
+	aside {
+		height: 50vh;
+	}
+}
+

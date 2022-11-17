@@ -2,7 +2,7 @@ import { Config, SignalType, Signal, Signals } from './Types';
 
 export class SignalFactory {
 
-	constructor(private readonly config: Config) {
+	constructor(private readonly config: Pick<Config, "size" | "rate">) {
 	}
 
 	generate_all(): Signals {
@@ -16,7 +16,7 @@ export class SignalFactory {
 		const { size } = this.config;
 		const signal = new Float32Array(size);
 		for (let i = 0; i < size; ++i) {
-			signal[i] = (2 * Math.random() - 1) * Math.sqrt(size);
+			signal[i] += (2 * Math.random() - 1) * Math.sqrt(size) * 2;
 		}
 		return signal;
 	}

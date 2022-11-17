@@ -2,6 +2,7 @@ import { Config } from './Types';
 
 export class Mapping {
 
+	public readonly fmin: number;
 	public readonly fmax: number;
 
 	constructor(
@@ -11,14 +12,15 @@ export class Mapping {
 		public readonly db_min: number = -60,
 		public readonly db_max: number = +60,
 	) {
-		this.fmax = config.rate / 2;
+		this.fmin = 10;
+		this.fmax = Math.min(20000, config.rate / 2);
 	}
 
 	project(x: number, y: number): [number, number] {
 		const { width, height } = this;
 		return [
-			(0.1 + x) * width / 1.2,
-			(0.1 + y) * height / 1.2
+			x * width,
+			y * height
 		];
 	}
 
@@ -37,16 +39,15 @@ export class Mapping {
 		return Math.min(size / 2 - 1, Math.max(0, Math.round(f * size / rate)));
 	}
 
-	project_x(x: number, xmax: number): number {
-		return Math.log(x) / Math.log(xmax);
+	project_x(x: number, xmin: number, xmax: number): number {
+		const lx = Math.log(x);
+		const lmin = Math.log(xmin);
+		const lmax = Math.log(xmax);
+		return (lx - lmin) / (lmax - lmin);
 	}
 
 	project_f(f: number): number {
-		return this.project_x(f, this.fmax);
-	}
-
-	project_i(i: number): number {
-		return this.project_f(this.i_to_f(i))
+		return this.project_x(f, this.fmin, this.fmax);
 	}
 
 	project_db(db: number): number {
@@ -54,15 +55,11 @@ export class Mapping {
 		return (db_max - db) / (db_max - db_min);
 	}
 
-	project_level(level: number): number {
-		return this.project_db(this.level_to_db(level));
-	}
-
 	unproject(u: number, v: number): [number, number] {
 		const { width, height } = this;
 		return [
-			u * 1.2 / width - 0.1,
-			v * 1.2 / height - 0.1,
+			u / width,
+			v / height,
 		];
 	}
 

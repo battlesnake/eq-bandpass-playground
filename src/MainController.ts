@@ -1,21 +1,13 @@
-import { Signals, Cursor, Config, Model, Controller, View } from './Types';
-import { Biquad } from './Biquad';
-import { SignalFactory } from './SignalFactory';
-
-import FFT from 'fft.js';
+import { Signals, Cursor, Config, Model, Controller, View, SpectrumStrategy } from './Types';
 
 export class MainController implements Controller {
-
-	private readonly fft: typeof FFT;
-	private readonly signals: Signals;
 
 	constructor(
 		private readonly config: Readonly<Config>,
 		private readonly model: Model,
-		private readonly views: ReadonlyArray<View>
+		private readonly views: ReadonlyArray<View>,
+		private readonly strategy: SpectrumStrategy
 	) {
-		this.fft = new (FFT as any)(config.size);
-		this.signals = new SignalFactory(config).generate_all();
 		for (const view of this.views) {
 			view.init(this);
 		}
@@ -31,6 +23,9 @@ export class MainController implements Controller {
 
 	set_q(value: number) {
 		this.model.q = value
+		for (const band of this.model.eq) {
+			band.q = value;
+		}
 		this.recalculate();
 		this.update();
 	}
@@ -41,27 +36,29 @@ export class MainController implements Controller {
 		this.update();
 	}
 
-	set_cursor(cursor: Cursor) {
-		this.model.cursor = cursor;
+	interpolate_db(f: number): number | null {
+		const spectrum = this.model.spectrum;
+		for (let i = 0; i < spectrum.length - 2; i += 2) {
+			const f0 = spectrum[i];
+			const f1 = spectrum[i + 2];
+			if (f >= f0 && f <= f1 && f1 > f0) {
+				const lerp = (f - f0) / (f1 - f0);
+				const db0 = spectrum[i + 1];
+				const db1 = spectrum[i + 3];
+				return db0 + lerp * (db1 - db0);
+			}
+		}
+		return null;
+	}
+
+	set_cursor(cursor_f: number, cursor_db: number) {
+		const value_db = this.interpolate_db(cursor_f);
+		this.model.cursor = { cursor_f, cursor_db, value_db };
 		this.update();
 	}
 
 	recalculate() {
-		const { size, rate } = this.config;
-		const model = this.model;
-		const signal = new Float32Array(this.signals[this.model.signal]);
-		for (const eq of model.eq) {
-			const filter = Biquad.create_bandpass(eq.f, eq.g, model.q, rate);
-			filter.apply(signal);
-		}
-		const spectrum = new Float32Array(size * 2);
-		(this.fft as any).realTransform(spectrum, [...signal]);
-		const reduced_spectrum = new Float32Array(size / 2);
-		for (let i = 0; i < size / 2; i++) {
-			const abs = Math.hypot(spectrum[i*2], spectrum[i*2 + 1]) / Math.sqrt(signal.length) / 128;
-			reduced_spectrum[i] = Math.max(reduced_spectrum[i], abs);
-		}
-		this.model.spectrum = reduced_spectrum;
+		this.model.spectrum = this.strategy.calculate();
 	}
 
 }

@@ -6,7 +6,7 @@ const d3 = require('d3');
 export class ControlsView implements View {
 
 	init(controller: Controller) {
-		const q = d3.select("aside section.q")
+		const q = d3.select("aside")
 			.selectAll("label.control.eq.q")
 			.data([1])
 			.enter()
@@ -30,7 +30,7 @@ export class ControlsView implements View {
 			.attr("class", "control-value")
 			.text("")
 			;
-		const bars = d3.select("aside section.eq")
+		const bars = d3.select("aside")
 			.selectAll("label.control.eq.g")
 			.data(eq_freq.map((x, i) => ({ x, i })))
 			.enter()
@@ -39,7 +39,7 @@ export class ControlsView implements View {
 				;
 		bars.append("span")
 			.attr("class", "control-name")
-			.text(({ x }) => x < 1000 ? `${x} Hz` : `${x / 1000} kHz`)
+			.text(({ x }) => x < 1000 ? `${x}` : `${x / 1000}k`)
 			;
 		bars.append("input")
 			.attr("class", "slider")
@@ -56,7 +56,7 @@ export class ControlsView implements View {
 	}
 
 	update(model: Model) {
-		const q = d3.select("aside section.q")
+		const q = d3.select("aside")
 			.selectAll("label.control.eq.q")
 			.data([model.q])
 			;
@@ -66,7 +66,7 @@ export class ControlsView implements View {
 		q.select(".control-value")
 			.text(x => x.toFixed(1))
 			;
-		const controls = d3.select("aside section.eq")
+		const controls = d3.select("aside")
 			.selectAll("label.control.eq")
 			.data(model.eq)
 			;
@@ -76,7 +76,7 @@ export class ControlsView implements View {
 			;
 		controls
 			.select(".control-value")
-			.text(x => `${x.g} dB`)
+			.text(x => `${x.g}dB`)
 			;
 	}
 

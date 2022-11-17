@@ -8,10 +8,9 @@ export class CursorView implements View {
 	}
 
 	update(model: Model) {
-		const cursor = model.cursor;
+		const { cursor_f, cursor_db, value_db } = model.cursor;
 		const node = d3.select(".cursor");
-		const value_db = 20 * Math.log10(model.spectrum[cursor.i]);
-		node.text(`x: ${cursor.f.toFixed(0)} Hz\ny: ${cursor.db.toFixed(2)} dB\nvalue: ${value_db.toFixed(2)} dB`);
+		node.text(`x: ${cursor_f.toFixed(0)} Hz\ny: ${cursor_db.toFixed(2)} dB\nvalue: ${value_db?.toFixed(2) ?? "n/a"} dB`);
 	}
 
 }
