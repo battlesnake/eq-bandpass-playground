@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack build --mode development --color",
-    "watch": "webpack build --mode development --color --watch",
+    "build": "webpack build --mode production --color",
     "start": "webpack serve"
   },
   "author": "Mark Cowan",
