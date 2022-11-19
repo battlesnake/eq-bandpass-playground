@@ -38,6 +38,7 @@ export class DefaultModel implements Model {
 	constructor(
 		private readonly strategy: AnalysisStrategy
 	) {
+		this.update_eq();
 	}
 
 	set_q(value: number) {

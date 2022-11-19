@@ -6,16 +6,6 @@ const d3 = require('d3');
 
 export class SpectrumView implements View {
 
-	private viewer_onclick(controller: Controller, e: MouseEvent) {
-		const viewer = d3.select(".viewer").node() as HTMLCanvasElement;
-		const { rate, size } = this.config;
-		const mapping = new Mapping(this.config, viewer);
-		const [x, y] = mapping.unproject(e.clientX * devicePixelRatio, e.clientY * devicePixelRatio);
-		const f = mapping.unproject_f(x);
-		const db = mapping.unproject_db(y);
-		controller.set_cursor(f, db);
-	}
-
 	private readonly node: HTMLCanvasElement;
 	private readonly context: CanvasRenderingContext2D;
 
@@ -28,7 +18,7 @@ export class SpectrumView implements View {
 		this.context = this.node.getContext('2d') as CanvasRenderingContext2D;
 	}
 
-	private on_resize() {
+	private onresize() {
 		const width = this.node.clientWidth;
 		const height = this.node.clientHeight;
 		const ratio = window.devicePixelRatio;
@@ -37,10 +27,23 @@ export class SpectrumView implements View {
 		this.update();
 	}
 
+	private onmousemove(controller: Controller, e: MouseEvent) {
+		if (!(e.buttons & 1)) {
+			return;
+		}
+		const viewer = d3.select(".viewer").node() as HTMLCanvasElement;
+		const { rate, size } = this.config;
+		const mapping = new Mapping(this.config, viewer);
+		const [x, y] = mapping.unproject(e.clientX * devicePixelRatio, e.clientY * devicePixelRatio);
+		const f = mapping.unproject_f(x);
+		const db = mapping.unproject_db(y);
+		controller.set_cursor(f, db);
+	}
+
 	bind(controller: Controller) {
-		const observer = new ResizeObserver(_.debounce(() => this.on_resize(), 40, { leading: true, trailing: true }));
+		const observer = new ResizeObserver(_.debounce(() => this.onresize(), 40, { leading: true, trailing: true }));
 		observer.observe(this.node);
-		this.node.addEventListener('click', (e) => this.viewer_onclick(controller, e));
+		this.node.addEventListener('mousemove', (e) => this.onmousemove(controller, e));
 	}
 
 	update() {
@@ -125,6 +128,34 @@ export class SpectrumView implements View {
 			ctx.lineTo(...mapping.project(0, 1));
 			ctx.lineTo(...mapping.project(0, 0));
 			ctx.stroke();
+		}
+		{
+			/* Cursor */
+			const cursor = model.cursor;
+			ctx.lineWidth = 8;
+			ctx.strokeStyle = "cyan";
+			const f = cursor.cursor_f;
+			const db = cursor.cursor_db;
+			const vdb = cursor.value_db;
+			const [cx, cy] = mapping.project(mapping.project_f(f), mapping.project_db(db));
+			{
+				ctx.beginPath();
+				ctx.rect(cx - 1 / width, cy - 1 / height, 2 / width, 2 / height);
+				ctx.stroke();
+			}
+			if (vdb !== null) {
+				ctx.setLineDash([4, 4]);
+				const [vx, vy] = mapping.project(mapping.project_f(f), mapping.project_db(vdb));
+				ctx.beginPath();
+				ctx.rect(vx - 1 / width, vy - 1 / height, 2 / width, 2 / height);
+				ctx.stroke();
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(cx, cy);
+				ctx.lineTo(vx, vy);
+				ctx.stroke();
+				ctx.setLineDash([]);
+			}
 		}
 	}
 
