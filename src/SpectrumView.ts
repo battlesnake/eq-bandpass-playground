@@ -27,23 +27,35 @@ export class SpectrumView implements View {
 		this.update();
 	}
 
-	private onmousemove(controller: Controller, e: MouseEvent) {
-		if (!(e.buttons & 1)) {
-			return;
-		}
+	private onmovecursor(controller: Controller, clientX: number, clientY: number) {
 		const viewer = d3.select(".viewer").node() as HTMLCanvasElement;
 		const { rate, size } = this.config;
 		const mapping = new Mapping(this.config, viewer);
-		const [x, y] = mapping.unproject(e.clientX * devicePixelRatio, e.clientY * devicePixelRatio);
+		const [x, y] = mapping.unproject(clientX * devicePixelRatio, clientY * devicePixelRatio);
 		const f = mapping.unproject_f(x);
 		const db = mapping.unproject_db(y);
 		controller.set_cursor(f, db);
+	}
+
+	private onmousemove(controller: Controller, e: MouseEvent) {
+		if (e.buttons & 1) {
+			this.onmovecursor(controller, e.clientX, e.clientY);
+		}
+	}
+
+	private ontouchmove(controller: Controller, e: TouchEvent) {
+		const touch = e.touches.item(0);
+		if (touch === null) {
+			return;
+		}
+		this.onmovecursor(controller, touch.clientX, touch.clientY);
 	}
 
 	bind(controller: Controller) {
 		const observer = new ResizeObserver(_.debounce(() => this.onresize(), 40, { leading: true, trailing: true }));
 		observer.observe(this.node);
 		this.node.addEventListener('mousemove', (e) => this.onmousemove(controller, e));
+		this.node.addEventListener('touchmove', (e) => this.ontouchmove(controller, e));
 	}
 
 	update() {
