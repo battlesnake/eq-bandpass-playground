@@ -1,15 +1,14 @@
-import { SpectrumStrategy, Config, Model, Signals } from './Types';
+import { AnalysisStrategy, Config, Model, Signals, EqBand } from './Types';
 import { Mapping } from './Mapping';
 import { Equaliser } from './Equaliser';
 import { SignalFactory } from './SignalFactory';
 
-export class SerialStrategy implements SpectrumStrategy {
+export class SerialStrategy implements AnalysisStrategy {
 
 	private readonly sines: Array<{ f: number; y: Float32Array }>;
 
 	constructor(
 		private readonly config: Config,
-		private readonly model: Model,
 	) {
 		const { rate } = this.config;
 		const mapping = new Mapping(this.config);
@@ -27,13 +26,13 @@ export class SerialStrategy implements SpectrumStrategy {
 		});
 	}
 
-	calculate(): Float32Array {
+	calculate(bands: ReadonlyArray<EqBand>): Float32Array {
 		const mapping = new Mapping(this.config);
 		const result = new Float32Array(this.sines.length * 2);
 		let out_it = 0;
 		for (const { f, y } of this.sines) {
 			const signal = new Float32Array(y);
-			const eq = new Equaliser(this.config, this.model.eq);
+			const eq = new Equaliser(this.config, bands);
 			eq.apply(signal);
 			const level = signal.reduce((a, b) => Math.max(a, Math.abs(b)), 0);
 			const db = mapping.level_to_db(level);

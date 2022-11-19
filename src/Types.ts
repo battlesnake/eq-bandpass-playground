@@ -1,4 +1,4 @@
-export type StrategyName = 'fourier' | 'sines';
+export type AnalysisStrategyName = 'fourier' | 'sines';
 
 export type Signal = Float32Array;
 
@@ -25,25 +25,28 @@ export interface Config {
 }
 
 export interface Model {
-	signal: SignalType;
-	q: number;
-	eq: Array<EqBand>;
-	cursor: Cursor;
-	spectrum: Float32Array;
+	readonly q: Readonly<number>;
+	readonly eq: ReadonlyArray<EqBand>;
+	readonly cursor: Readonly<Cursor>;
+	/* (f, db), ... */
+	readonly spectrum: Readonly<Float32Array>;
+
+	set_q(value: number): void;
+	set_gain(band: number, value: number): void;
+	set_cursor(f: number, db: number): void;
 }
 
 export interface Controller {
-	update();
-	set_q(value: number);
-	set_g(index: number, value: number);
-	set_cursor(f: number, db: number);
+	set_q(value: number): void;
+	set_gain(index: number, value: number): void;
+	set_cursor(f: number, db: number): void;
 }
 
 export interface View {
-	init(controller: Controller);
-	update(model: Model);
+	bind(controller: Controller): void;
+	update(): void;
 }
 
-export interface SpectrumStrategy {
-	calculate(): Float32Array;
+export interface AnalysisStrategy {
+	calculate(bands: ReadonlyArray<EqBand>): Float32Array;
 }

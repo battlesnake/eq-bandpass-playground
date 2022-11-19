@@ -5,7 +5,7 @@ export class Equaliser {
 
 	private readonly filters: Array<Biquad>;
 
-	constructor(config: Pick<Config, "rate">, bands: Array<EqBand>) {
+	constructor(config: Pick<Config, "rate">, bands: ReadonlyArray<EqBand>) {
 		const { rate } = config;
 		this.filters = bands.map(({ f, g, q }) => Biquad.create_bandpass(f, g, q, rate));
 	}

@@ -1,5 +1,6 @@
 * {
 	box-sizing: border-box;
+	overflow: hidden;
 }
 
 html,
@@ -13,18 +14,38 @@ body {
 	color: #ddd;
 	display: flex;
 	flex-flow: row nowrap;
+	align-items: stretch;
+	max-width: 100%;
+	max-height: 100%;
 }
 
 main {
 	flex: 1 1;
 	display: flex;
 	flex-flow: column nowrap;
+	align-items: stretch;
 }
 
 aside {
-	flex: 0 0;
+	padding: 0 1ch;
+	flex: 0 0 23ch;
 	display: flex;
 	flex-flow: column wrap;
+}
+
+.viewer {
+	flex: 1 1;
+	display: block;
+}
+
+.cursor {
+	flex: 0 0 5em;
+	padding: 1em;
+	line-height: 1em;
+	font-family: monospace;
+	white-space: pre;
+	display: flex;
+	flex-flow: row nowrap;
 }
 
 .control {
@@ -43,6 +64,7 @@ aside {
 }
 
 .control .slider {
+	accent-color: #0075fe;
 	width: 9ch;
 	margin-left: 0.5em;
 	margin-right: 0.5em;
@@ -56,25 +78,38 @@ aside {
 	white-space: nowrap;
 }
 
-.viewer {
-	flex: 1 1;
-	display: block;
+.control.q {
+	margin-bottom: calc(1em + 2 * 4px + 4px);
 }
 
-.cursor {
-	flex: 0 0 3em;
-	font-family: monospace;
-	padding: 1em;
-	white-space: pre;
+.control.q .slider {
+	accent-color: #00de55;
+}
+
+.cursor-x,
+.cursor-y,
+.cursor-v {
+	padding-right: 2ch;
+}
+
+.cursor-x {
+	width: 15ch;
+}
+
+.cursor-y,
+.cursor-v {
+	width: 19ch;
 }
 
 @media (orientation: portrait) {
 	body {
 		flex-direction: column;
-		max-width: 100%;
+	}
+	main {
+		flex: 0 0 40vh;
 	}
 	aside {
-		height: 50vh;
+		flex: 0 0 60vh;
 	}
 }
 

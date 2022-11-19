@@ -1,16 +1,43 @@
-import { Model, Controller, View } from './Types';
+import { Model, Controller, View } from "./Types";
 
-const d3 = require('d3');
+const d3 = require("d3");
 
 export class CursorView implements View {
 
-	init(controller: Controller) {
+	private readonly node: d3.Selection<HTMLElement, {}, HTMLElement, any>;
+
+	constructor(
+		private readonly model: Model
+	) {
+		this.node = d3.select(".cursor");
 	}
 
-	update(model: Model) {
-		const { cursor_f, cursor_db, value_db } = model.cursor;
-		const node = d3.select(".cursor");
-		node.text(`x: ${cursor_f.toFixed(0)} Hz\ny: ${cursor_db.toFixed(2)} dB\nvalue: ${value_db?.toFixed(2) ?? "n/a"} dB`);
+	bind(controller: Controller) {
+		this.node
+			.append("span")
+			.attr("class", "cursor-x")
+			;
+		this.node
+			.append("span")
+			.attr("class", "cursor-y")
+			;
+		this.node
+			.append("span")
+			.attr("class", "cursor-v")
+			;
+	}
+
+	update() {
+		const { cursor_f, cursor_db, value_db } = this.model.cursor;
+		this.node.select(".cursor-x")
+			.text(`x: ${cursor_f.toFixed(0)} Hz`)
+			;
+		this.node.select(".cursor-y")
+			.text(`y: ${cursor_db.toFixed(2)} dB`)
+			;
+		this.node.select(".cursor-v")
+			.text(`value: ${value_db?.toFixed(2) ?? "-"} dB`)
+			;
 	}
 
 }

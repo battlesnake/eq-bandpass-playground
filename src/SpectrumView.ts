@@ -1,6 +1,7 @@
 import { Config, Model, Controller, View } from './Types';
 import { Mapping } from './Mapping';
 
+const _ = require('lodash');
 const d3 = require('d3');
 
 export class SpectrumView implements View {
@@ -18,26 +19,33 @@ export class SpectrumView implements View {
 	private readonly node: HTMLCanvasElement;
 	private readonly context: CanvasRenderingContext2D;
 
-	constructor(private readonly config: Readonly<Config>) {
+	constructor(
+		private readonly config: Readonly<Config>,
+		private readonly model: Model
+	) {
 		const viewer = d3.select(".viewer");
 		this.node = viewer.node() as HTMLCanvasElement;
 		this.context = this.node.getContext('2d') as CanvasRenderingContext2D;
 	}
 
-	init(controller: Controller) {
-		const viewer = d3.select(".viewer").node() as HTMLCanvasElement;
-		const observer = new ResizeObserver(() => {
-			const ratio = window.devicePixelRatio;
-			viewer.width = Math.round(viewer.clientWidth * ratio);
-			viewer.height = Math.round(viewer.clientHeight * ratio);
-			controller.update();
-		});
-		observer.observe(viewer);
-		viewer.addEventListener('click', (e) => this.viewer_onclick(controller, e));
+	private on_resize() {
+		const width = this.node.clientWidth;
+		const height = this.node.clientHeight;
+		const ratio = window.devicePixelRatio;
+		this.node.width = Math.round(width * ratio);
+		this.node.height = Math.round(height * ratio);
+		this.update();
 	}
 
-	update(model: Model) {
+	bind(controller: Controller) {
+		const observer = new ResizeObserver(_.debounce(() => this.on_resize(), 40, { leading: true, trailing: true }));
+		observer.observe(this.node);
+		this.node.addEventListener('click', (e) => this.viewer_onclick(controller, e));
+	}
+
+	update() {
 		const config = this.config;
+		const model = this.model;
 		const node = this.node;
 		const ctx = this.context;
 		const width = node.width;

@@ -1,8 +1,23 @@
 const path = require('path');
 
 module.exports = {
-	entry: './src/main.ts',
-	devtool: 'inline-source-map',
+	mode: 'development',
+	entry: {
+		main: './src/main.ts',
+	},
+	optimization: {
+		runtimeChunk: 'single',
+		splitChunks: {
+			cacheGroups: {
+				vendor: {
+					test: /[\\/]node_modules[\\/]/,
+					name: 'vendors',
+					chunks: 'all'
+				}
+			}
+		}
+	},
+	devtool: 'source-map',
 	module: {
 		rules: [
 			{
@@ -18,8 +33,11 @@ module.exports = {
 		],
 	},
 	output: {
-		filename: 'main.js',
-		path: path.resolve(__dirname, 'public/js/'),
+		filename: '[name].js',
+		path: path.resolve(__dirname, 'public/'),
+	},
+	devServer: {
+		static: path.join(__dirname, 'public/'),
 	},
 	resolve: {
 		fallback: {

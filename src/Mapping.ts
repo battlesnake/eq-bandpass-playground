@@ -1,5 +1,8 @@
 import { Config } from './Types';
 
+const padding = 0.01;
+const nonpadding = 1 - (2 * padding);
+
 export class Mapping {
 
 	public readonly fmin: number;
@@ -23,8 +26,8 @@ export class Mapping {
 	project(x: number, y: number): [number, number] {
 		const { width, height } = this;
 		return [
-			x * width,
-			y * height
+			(x * nonpadding + padding) * width,
+			(y * nonpadding + padding) * height
 		];
 	}
 
@@ -62,8 +65,8 @@ export class Mapping {
 	unproject(u: number, v: number): [number, number] {
 		const { width, height } = this;
 		return [
-			u / width,
-			v / height,
+			(u / width - padding) / nonpadding,
+			(v / height - padding) / nonpadding,
 		];
 	}
 

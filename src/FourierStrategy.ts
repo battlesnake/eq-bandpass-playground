@@ -1,38 +1,49 @@
-import { SpectrumStrategy, Config, Model, Signals } from './Types';
+import { AnalysisStrategy, Config, Model, SignalType, EqBand, Signal } from './Types';
 import { Mapping } from './Mapping';
 import { SignalFactory } from './SignalFactory';
 import { Equaliser } from './Equaliser';
 
 import FFT from 'fft.js';
 
-export class FourierStrategy implements SpectrumStrategy {
+export class FourierStrategy implements AnalysisStrategy {
 
 	private readonly fft: typeof FFT;
-	private readonly signals: Signals;
+	private readonly signal: Signal;
+	private readonly baseline: Readonly<Float32Array>;
 
-	constructor(
-		private readonly config: Config,
-		private readonly model: Model,
-	) {
-		this.fft = new (FFT as any)(config.size);
-		this.signals = new SignalFactory(config).generate_all();
-	}
-
-	calculate(): Float32Array {
-		const { size, rate } = this.config;
-		const signal = new Float32Array(this.signals[this.model.signal]);
-		const eq = new Equaliser(this.config, this.model.eq);
-		eq.apply(signal);
+	private get_spectrum(signal: Readonly<Float32Array>): Float32Array {
+		const mapping = new Mapping(this.config);
+		const { size } = this.config;
 		const transform = new Float32Array(size * 2);
 		(this.fft as any).realTransform(transform, [...signal]);
-		const mapping = new Mapping(this.config);
 		const result = new Float32Array(size);
 		for (let i = 0; i < size; i += 2) {
 			const level = Math.hypot(transform[i], transform[i + 1]) / Math.sqrt(signal.length) / 128;
 			result[i] = mapping.i_to_f(i / 2);
-			result[i + 1] = mapping.level_to_db(level);
+			result[i + 1] = level;
 		}
 		return result;
+	}
+
+	constructor(
+		private readonly config: Config,
+	) {
+		this.fft = new (FFT as any)(config.size);
+		this.signal = new SignalFactory(config).generate_noise();
+		this.baseline = this.get_spectrum(this.signal);
+	}
+
+	calculate(bands: ReadonlyArray<EqBand>): Float32Array {
+		const mapping = new Mapping(this.config);
+		const { size } = this.config;
+		const signal = new Float32Array(this.signal);
+		const eq = new Equaliser(this.config, bands);
+		eq.apply(signal);
+		const spectrum = this.get_spectrum(signal);
+		for (let i = 1; i < spectrum.length; i += 2) {
+			spectrum[i] = mapping.level_to_db(spectrum[i] / this.baseline[i]);
+		}
+		return spectrum;
 	}
 
 }

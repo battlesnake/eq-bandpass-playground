@@ -5,7 +5,12 @@ const d3 = require('d3');
 
 export class ControlsView implements View {
 
-	init(controller: Controller) {
+	constructor(
+		private readonly model: Model
+	) {
+	}
+
+	bind(controller: Controller) {
 		/* Bandwidth */
 		const q = d3.select("aside")
 			.selectAll("label.control.q")
@@ -48,7 +53,7 @@ export class ControlsView implements View {
 			.attr("min", "-32")
 			.attr("max", "32")
 			.attr("value", 0)
-			.on("input", (e, { i }) => controller.set_g(i, e.currentTarget.value))
+			.on("input", (e, { i }) => controller.set_gain(i, e.currentTarget.value))
 			;
 		bars.append("span")
 			.attr("class", "control-value eq")
@@ -56,7 +61,8 @@ export class ControlsView implements View {
 			;
 	}
 
-	update(model: Model) {
+	update() {
+		const model = this.model;
 		/* Bandwidth */
 		const q = d3.select("aside")
 			.selectAll("label.control.q")
