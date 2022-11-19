@@ -106,10 +106,10 @@ aside {
 		flex-direction: column;
 	}
 	main {
-		flex: 0 0 40vh;
+		flex: 0 0 30vh;
 	}
 	aside {
-		flex: 0 0 60vh;
+		flex: 0 0 70vh;
 	}
 }
 
