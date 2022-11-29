@@ -31,15 +31,15 @@ export interface Model {
 	/* (f, db), ... */
 	readonly spectrum: Readonly<Float32Array>;
 
-	set_q(value: number): void;
-	set_gain(band: number, value: number): void;
-	set_cursor(f: number, db: number): void;
+	set_q(value: number): Promise<void>;
+	set_gain(band: number, value: number): Promise<void>;
+	set_cursor(f: number, db: number): Promise<void>;
 }
 
 export interface Controller {
-	set_q(value: number): void;
-	set_gain(index: number, value: number): void;
-	set_cursor(f: number, db: number): void;
+	set_q(value: number): Promise<void>;
+	set_gain(index: number, value: number): Promise<void>;
+	set_cursor(f: number, db: number): Promise<void>;
 }
 
 export interface View {
@@ -48,5 +48,5 @@ export interface View {
 }
 
 export interface AnalysisStrategy {
-	calculate(bands: ReadonlyArray<EqBand>): Float32Array;
+	calculate(bands: ReadonlyArray<EqBand>): Promise<Float32Array>;
 }

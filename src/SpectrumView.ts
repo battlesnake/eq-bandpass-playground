@@ -54,7 +54,9 @@ export class SpectrumView implements View {
 	bind(controller: Controller) {
 		const observer = new ResizeObserver(_.debounce(() => this.onresize(), 40, { leading: true, trailing: true }));
 		observer.observe(this.node);
+		this.node.addEventListener('mousedown', (e) => this.onmousemove(controller, e));
 		this.node.addEventListener('mousemove', (e) => this.onmousemove(controller, e));
+		this.node.addEventListener('touchstart', (e) => this.ontouchmove(controller, e));
 		this.node.addEventListener('touchmove', (e) => this.ontouchmove(controller, e));
 	}
 

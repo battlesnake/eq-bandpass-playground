@@ -33,7 +33,7 @@ export class FourierStrategy implements AnalysisStrategy {
 		this.baseline = this.get_spectrum(this.signal);
 	}
 
-	calculate(bands: ReadonlyArray<EqBand>): Float32Array {
+	async calculate(bands: ReadonlyArray<EqBand>): Promise<Float32Array> {
 		const mapping = new Mapping(this.config);
 		const { size } = this.config;
 		const signal = new Float32Array(this.signal);

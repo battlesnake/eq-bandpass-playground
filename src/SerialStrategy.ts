@@ -2,41 +2,56 @@ import { AnalysisStrategy, Config, Model, Signals, EqBand } from './Types';
 import { Mapping } from './Mapping';
 import { Equaliser } from './Equaliser';
 import { SignalFactory } from './SignalFactory';
+import { SerialRequest, SerialInitRequest, SerialJobRequest, SerialResponse, SerialJobResponse } from './SerialTypes';
+
+type JobSerial = number;
 
 export class SerialStrategy implements AnalysisStrategy {
 
-	private readonly sines: Array<{ f: number; y: Float32Array }>;
+	private readonly workers: Array<Worker> = [];
+	private job_serial: JobSerial = 0;
+	private callbacks: Map<JobSerial, (result: SerialJobResponse) => void> = new Map();
+
+	private submit_job(worker: Worker, bands: ReadonlyArray<EqBand>): Promise<SerialJobResponse> {
+		const id = this.job_serial++;
+		const result = new Promise<SerialJobResponse>((resolve, reject) => {
+			this.callbacks.set(id, resolve);
+			worker.postMessage(<SerialJobRequest> { type: 'job', id, bands });
+		});
+		return result;
+	}
 
 	constructor(
 		private readonly config: Config,
 	) {
 		const { rate } = this.config;
 		const mapping = new Mapping(this.config);
-		const lmin = Math.floor(Math.log10(mapping.fmin)) | 0;
-		const lmax = Math.ceil(Math.log10(mapping.fmax)) | 0;
-		const res = 20;
-		const pts = res * (lmax - lmin)
-		this.sines = new Array(pts).fill(null).map((_, i) => {
+		const lmin = Math.log10(mapping.fmin);
+		const lmax = Math.log10(mapping.fmax);
+		const res = 18;
+		const pts = res * (lmax - lmin);
+		for (let i = 0; i <= pts; ++i) {
 			const lm = i / res + lmin;
-			const f = Math.pow(10, lm);
-			const period = rate / f;
-			const size = period;
-			const y = new SignalFactory({ size, rate }).generate_sine(f);
-			return { f, y };
-		});
+			const freq = Math.pow(10, lm);
+			const worker = new Worker(new URL('./SerialWorker', import.meta.url));
+			worker.onmessage = ({ data }: MessageEvent<SerialResponse>) => {
+				const id = data.id;
+				const callback = this.callbacks.get(id)!;
+				this.callbacks.delete(id);
+				callback(data);
+			};
+			worker.postMessage(<SerialInitRequest> { type: 'init', config, freq });
+			this.workers.push(worker);
+		}
 	}
 
-	calculate(bands: ReadonlyArray<EqBand>): Float32Array {
+	async calculate(bands: ReadonlyArray<EqBand>): Promise<Float32Array> {
+		const worker_results = await Promise.all(this.workers.map(worker => this.submit_job(worker, bands)));
 		const mapping = new Mapping(this.config);
-		const result = new Float32Array(this.sines.length * 2);
+		const result = new Float32Array(worker_results.length * 2);
 		let out_it = 0;
-		for (const { f, y } of this.sines) {
-			const signal = new Float32Array(y);
-			const eq = new Equaliser(this.config, bands);
-			eq.apply(signal);
-			const level = signal.reduce((a, b) => Math.max(a, Math.abs(b)), 0);
-			const db = mapping.level_to_db(level);
-			result[out_it++] = f;
+		for (const { freq, db } of worker_results) {
+			result[out_it++] = freq;
 			result[out_it++] = db;
 		}
 		return result;

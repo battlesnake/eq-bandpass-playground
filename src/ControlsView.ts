@@ -1,7 +1,12 @@
 import { Model, Controller, View } from './Types';
 import { eq_freq } from './frequencies';
 
+const _ = require('lodash');
 const d3 = require('d3');
+
+function debounce(fn) {
+	return _.debounce(fn, 60, { leading: true, trailing: true });
+}
 
 export class ControlsView implements View {
 
@@ -9,6 +14,17 @@ export class ControlsView implements View {
 		private readonly model: Model
 	) {
 	}
+
+	private set_q(controller: Controller, value: number) {
+		controller.set_q(Math.pow(10, value / 10));
+	}
+
+	private set_gain(controller: Controller, index: number, value: number) {
+		controller.set_gain(index, value);
+	}
+
+	private readonly debounced_set_q = debounce(this.set_q);
+	private readonly debounced_set_gain = debounce(this.set_gain);
 
 	bind(controller: Controller) {
 		/* Bandwidth */
@@ -29,7 +45,7 @@ export class ControlsView implements View {
 			.attr("min", "-10")
 			.attr("max", "10")
 			.attr("value", 0)
-			.on("input", (e) => controller.set_q(Math.pow(10, e.currentTarget.value / 10)));
+			.on("input", (e) => this.debounced_set_q(controller, e.currentTarget.value));
 			;
 		q.append("span")
 			.attr("class", "control-value q")
@@ -53,7 +69,7 @@ export class ControlsView implements View {
 			.attr("min", "-32")
 			.attr("max", "32")
 			.attr("value", 0)
-			.on("input", (e, { i }) => controller.set_gain(i, e.currentTarget.value))
+			.on("input", (e, { i }) => this.debounced_set_gain(controller, i, e.currentTarget.value))
 			;
 		bars.append("span")
 			.attr("class", "control-value eq")

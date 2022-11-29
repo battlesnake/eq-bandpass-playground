@@ -30,31 +30,36 @@ export class DefaultModel implements Model {
 		this.cursor.value_db = this.interpolate_db(this.cursor.cursor_f);
 	}
 
-	private update_eq() {
-		this.spectrum = this.strategy.calculate(this.eq);
+	private async update_eq() {
+		this.spectrum = await this.strategy.calculate(this.eq);
 		this.update_cursor();
 	}
+
+	private readonly init: Promise<void>;
 
 	constructor(
 		private readonly strategy: AnalysisStrategy
 	) {
-		this.update_eq();
+		this.init = this.update_eq();
 	}
 
-	set_q(value: number) {
+	async set_q(value: number) {
+		await this.init;
 		this.q = value
 		for (const band of this.eq) {
 			band.q = value;
 		}
-		this.update_eq();
+		await this.update_eq();
 	}
 
-	set_gain(band: number, value: number) {
+	async set_gain(band: number, value: number) {
+		await this.init;
 		this.eq[band].g = value;
-		this.update_eq();
+		await this.update_eq();
 	}
 
-	set_cursor(cursor_f: number, cursor_db: number) {
+	async set_cursor(cursor_f: number, cursor_db: number) {
+		await this.init;
 		this.cursor = { cursor_f, cursor_db, value_db: null };
 		this.update_cursor();
 	}

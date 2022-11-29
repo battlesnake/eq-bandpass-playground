@@ -19,18 +19,18 @@ export class MainController implements Controller {
 		}
 	}
 
-	set_q(value: number) {
-		this.model.set_q(value);
+	async set_q(value: number) {
+		await this.model.set_q(value);
 		this.update();
 	}
 
-	set_gain(index: number, value: number) {
-		this.model.set_gain(index, value);
+	async set_gain(index: number, value: number) {
+		await this.model.set_gain(index, value);
 		this.update();
 	}
 
-	set_cursor(cursor_f: number, cursor_db: number) {
-		this.model.set_cursor(cursor_f, cursor_db);
+	async set_cursor(cursor_f: number, cursor_db: number) {
+		await this.model.set_cursor(cursor_f, cursor_db);
 		this.update();
 	}
 
