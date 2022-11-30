@@ -31,8 +31,11 @@ export class DefaultModel implements Model {
 	}
 
 	private async update_eq() {
+		const t0 = +new Date();
 		this.spectrum = await this.strategy.calculate(this.eq);
 		this.update_cursor();
+		const t1 = +new Date();
+		console.log(`Calculation took ${t1 - t0} ms`);
 	}
 
 	private readonly init: Promise<void>;

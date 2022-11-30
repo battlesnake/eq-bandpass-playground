@@ -27,7 +27,7 @@ export class CursorView implements View {
 			;
 	}
 
-	update() {
+	async update() {
 		const { cursor_f, cursor_db, value_db } = this.model.cursor;
 		this.node.select(".cursor-x")
 			.text(`x: ${cursor_f.toFixed(0)} Hz`)

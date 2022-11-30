@@ -44,7 +44,7 @@ export interface Controller {
 
 export interface View {
 	bind(controller: Controller): void;
-	update(): void;
+	update(): Promise<void>;
 }
 
 export interface AnalysisStrategy {

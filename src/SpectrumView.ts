@@ -60,7 +60,7 @@ export class SpectrumView implements View {
 		this.node.addEventListener('touchmove', (e) => this.ontouchmove(controller, e));
 	}
 
-	update() {
+	async update() {
 		const config = this.config;
 		const model = this.model;
 		const node = this.node;

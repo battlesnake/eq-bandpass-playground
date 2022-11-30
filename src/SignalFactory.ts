@@ -21,13 +21,21 @@ export class SignalFactory {
 		return signal;
 	}
 
-	generate_sine(f: number): Signal {
+	generate_sinusoid(f: number, phase: number = 0): Signal {
 		const { size, rate } = this.config;
 		const signal = new Float32Array(size);
 		for (let i = 0; i < size; ++i) {
-			signal[i] = Math.sin(2 * Math.PI * f * i / rate)
+			signal[i] = Math.sin(2 * Math.PI * f * i / rate + phase)
 		}
 		return signal;
+	}
+
+	generate_sine(f: number): Signal {
+		return this.generate_sinusoid(f, 0);
+	}
+
+	generate_cosine(f: number): Signal {
+		return this.generate_sinusoid(f, Math.PI / 2);
 	}
 
 };
